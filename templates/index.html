@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel NATIVO | ANYmal</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); padding: 20px;}
+        h1 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; }
+        .breadcrumb { font-family: monospace; background: #ecf0f1; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
+        .item:hover { background-color: #f8f9fa; }
+        .btn { padding: 8px 15px; border-radius: 4px; text-decoration: none; font-weight: bold; color: white; cursor: pointer; border: none;}
+        .btn-blue { background-color: #3498db; } .btn-green { background-color: #27ae60; } .btn-gray { background-color: #7f8c8d; }
+        
+        #loading { display: none; background: rgba(0,0,0,0.85); color: white; position: fixed; top: 0; left: 0; width: 100%; height: 100%; justify-content: center; align-items: center; z-index: 9999; flex-direction: column;}
+        .spinner { border: 6px solid rgba(255,255,255,0.2); border-top: 6px solid #2ecc71; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 20px;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .progress-container { width: 400px; background-color: rgba(255,255,255,0.2); border-radius: 8px; overflow: hidden; margin-top: 15px; }
+        .progress-bar { height: 25px; background-color: #2ecc71; width: 0%; transition: width 0.4s ease; text-align: center; color: #111; font-weight: bold; line-height: 25px;}
+        #load-msg { margin-top: 15px; font-size: 18px; font-weight: 500; }
+    </style>
+    <script>
+        function iniciarDownload(url) {
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('load-msg').innerText = "Iniciando...";
+            document.getElementById('barra-progresso').style.width = "0%";
+            document.getElementById('barra-progresso').innerText = "0%";
+            window.location.href = url;
+
+            let intervalo = setInterval(() => {
+                fetch('/api/progresso')
+                    .then(r => r.json())
+                    .then(data => {
+                        document.getElementById('load-msg').innerText = data.mensagem;
+                        document.getElementById('barra-progresso').style.width = data.porcentagem + "%";
+                        document.getElementById('barra-progresso').innerText = data.porcentagem + "%";
+                        
+                        if(data.porcentagem >= 100) {
+                            clearInterval(intervalo);
+                            setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 2000);
+                        }
+                    })
+                    .catch(e => console.log(e));
+            }, 500);
+        }
+    </script>
+</head>
+<body>
+    <div id="loading">
+        <div class="spinner"></div>
+        <div class="progress-container"><div id="barra-progresso" class="progress-bar">0%</div></div>
+        <span id="load-msg">Iniciando...</span>
+    </div>
+
+    <div class="container">
+        <h1>🤖 Navegador SSD ANYmal</h1>
+        <div class="breadcrumb">📍 Caminho: {{ caminho_atual }}</div>
+        
+        {% if caminho_atual != pasta_base %}
+            <div class="item">
+                <span>⬆️ Subir Diretório</span>
+                <a href="/?path={{ parent_dir }}" class="btn btn-gray">Voltar</a>
+            </div>
+        {% endif %}
+
+        {% for item in itens %}
+            <div class="item">
+                {% if item.is_dir %}
+                    <span>📁 {{ item.nome }}</span>
+                    <div>
+                        <a href="/?path={{ item.caminho_absoluto }}" class="btn btn-blue">Abrir Pasta</a>
+                        <button class="btn btn-green" onclick="iniciarDownload('/traduzir_missao?path={{ item.caminho_absoluto }}')">🇧🇷 Gerar PDF + Fotos</button>
+                    </div>
+                {% else %}
+                    <span>📄 {{ item.nome }}</span>
+                    <a href="/baixar_arquivo?path={{ item.caminho_absoluto }}" class="btn btn-gray">Baixar</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>Pasta vazia.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
