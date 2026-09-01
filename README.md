@@ -1,4 +1,4 @@
-# Anymal-Tradução
+# ANYmal-Tradução
 # Instalação
 Ir para o Dowloads:
 
@@ -13,20 +13,20 @@ git clone https://github.com/Tolonio/servidor_anymal.git
 ``` 
 
 
-Use o scp -r para clonar todo os arquivos do git para o anymal:
+Use o scp -r para clonar todo os arquivos do git para o ANYmal:
 
 ```
 scp -r ./servidor_anymal/* integration@anymal-<nomedoanymal>-npc:/home/integration/servidor_anymal
 ```
 
-Acessar o ssh do anymal:
+Acessar o ssh do ANYmal:
 
 ```
 ssh integration@anymal-<nomedoanymal>-npc
 ```
 
 
-Dentro do anymal navegue:
+Dentro do ANYmal navegue:
 
 ```
 cd /home/integration/servidor_anymal
@@ -60,6 +60,8 @@ Instale:
 python3 -m pip install flask deep-translator lxml weasyprint
 
 ```
+
+Caso não queira toda vez iniciar o servidor, crie o serviço abaixo. 
 
 Rode:
 ```
